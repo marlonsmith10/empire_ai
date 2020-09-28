@@ -1,0 +1,43 @@
+--- ai_core.cpp	2020-09-24 15:45:06.860414226 -0400
++++ ai_core.cpp	2020-09-24 16:13:23.276368701 -0400
+@@ -23,6 +23,8 @@
+ 
+ #include "../safeguards.h"
+ 
++#include "empire_ai/src/empire_ai.hh"
++
+ /* static */ uint AI::frame_counter = 0;
+ /* static */ AIScannerInfo *AI::scanner_info = nullptr;
+ /* static */ AIScannerLibrary *AI::scanner_library = nullptr;
+@@ -55,7 +57,16 @@
+ 
+ 	c->ai_info = info;
+ 	assert(c->ai_instance == nullptr);
+-	c->ai_instance = new AIInstance();
++
++	if(strcmp(config->GetName(), "EmpireAI") == 0)
++	{
++		c->ai_instance = new EmpireAI::AI();
++	}
++	else
++	{
++		c->ai_instance = new AIInstance();
++	}
++
+ 	c->ai_instance->Initialize(info);
+ 
+ 	cur_company.Restore();
+@@ -80,6 +91,13 @@
+ 			PerformanceMeasurer framerate((PerformanceElement)(PFE_AI0 + c->index));
+ 			cur_company.Change(c->index);
+ 			c->ai_instance->GameLoop();
++
++			if(strcmp(c->ai_info->GetName(), "EmpireAI") == 0)
++			{
++				EmpireAI::AI* empire_ai = (EmpireAI::AI*)c->ai_instance;
++				empire_ai->game_loop();
++			}
++
+ 		} else {
+ 			PerformanceMeasurer::SetInactive((PerformanceElement)(PFE_AI0 + c->index));
+ 		}
