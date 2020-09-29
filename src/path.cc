@@ -44,17 +44,17 @@ bool Path::find()
 	    }
 
         // Calculate the f, h, g, values of the 4 surrounding nodes
-	    parse_adjacent_tile(m_current_node, m_end_tile_index, 1, 0);
-	    parse_adjacent_tile(m_current_node, m_end_tile_index, -1, 0);
-	    parse_adjacent_tile(m_current_node, m_end_tile_index, 0, 1);
-	    parse_adjacent_tile(m_current_node, m_end_tile_index, 0, -1);
+	    parse_adjacent_tile(m_current_node, 1, 0);
+	    parse_adjacent_tile(m_current_node, -1, 0);
+	    parse_adjacent_tile(m_current_node, 0, 1);
+	    parse_adjacent_tile(m_current_node, 0, -1);
 	}
 
 	return m_path_found;
 }
 
 
-void Path::parse_adjacent_tile(Node* current_node, TileIndex end, int8 x, int8 y)
+void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
 {
     TileIndex adjacent_tile_index = current_node->tile_index + ScriptMap::GetTileIndex(x, y);
 

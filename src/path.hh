@@ -36,7 +36,7 @@ namespace EmpireAI
 	        int32 f = -1;
 	    };
 
-		void parse_adjacent_tile(Node* current_node, TileIndex end, int8 x, int8 y);
+		void parse_adjacent_tile(Node* current_node, int8 x, int8 y);
 
 		// Return the corresponding node or create a new one if none is found
 		Node* get_node(TileIndex tile_index);
