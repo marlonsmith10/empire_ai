@@ -20,7 +20,7 @@ Path::Path(TileIndex start, TileIndex end)
 }
 
 
-bool Path::find()
+bool Path::find(uint16_t max_node_count)
 {
     if(m_path_found)
     {
@@ -28,7 +28,7 @@ bool Path::find()
     }
 
 	// While not at end of path
-	for(uint8 node_count = 0; node_count < NODE_COUNT_PER_CALL; node_count++)
+	for(uint8 node_count = 0; node_count < max_node_count; node_count++)
 	{
 	    // Find the cheapest open node
 	    m_current_node = cheapest_open_node();

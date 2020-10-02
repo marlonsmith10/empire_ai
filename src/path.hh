@@ -16,7 +16,7 @@ namespace EmpireAI
 		~Path();
 
 		// Find a partial path from start to end, returning true if the full path has been found
-		bool find();
+		bool find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
 
 	private:
 
@@ -45,7 +45,7 @@ namespace EmpireAI
 		Node* cheapest_open_node();
 
 		// Check this many nodes per call of find()
-		static const uint8 NODE_COUNT_PER_CALL = 20;
+		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
 
 		void open_node(Node* node);
 		void close_node(Node* node);
