@@ -12,11 +12,18 @@ namespace EmpireAI
 	{
 	public:
 
+		enum Status
+		{
+			IN_PROGRESS,
+			FOUND,
+			UNREACHABLE
+		};
+
 		Path(TileIndex start, TileIndex end);
 		~Path();
 
 		// Find a partial path from start to end, returning true if the full path has been found
-		bool find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
+		Status find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
 
 	private:
 
@@ -50,7 +57,7 @@ namespace EmpireAI
 		void open_node(Node* node);
 		void close_node(Node* node);
 
-		bool m_path_found = false;
+		Status m_status;
 
 		Node* m_start_node;
 		Node* m_current_node;

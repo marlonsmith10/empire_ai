@@ -2,19 +2,15 @@
 
 #include <iostream>
 #include "stdafx.h"
+#include "script_object.hpp"
+
 #include "command_func.h"
 
 #include "town.h"
 #include "townname_func.h"
 #include "town_type.h"
-#include "road.h"
 #include "debug.h"
 
-#include "strings_func.h"
-
-#include "script_road.hpp"
-#include "script_town.hpp"
-#include "script_map.hpp"
 
 
 #include <vector>
@@ -81,12 +77,20 @@ void AI::game_loop()
 	    break;
 	}
 	case FIND_PATH:
+	{
 	    std::cout << "\nFinding path..." << std::flush;
-	    if(m_path->find())
+	    Path::Status find_status = m_path->find();
+	    if(find_status == Path::FOUND)
 	    {
             m_state = BUILD_ROAD;
 	    }
+	    if(find_status == Path::UNREACHABLE)
+	    {
+	    	std::cout << "\nDestination unreachable!" << std::flush;
+	    	m_state = DONE;
+	    }
 	    break;
+	}
 	case BUILD_ROAD:
 	    std::cout << "\nBuilding road..." << std::flush;
 

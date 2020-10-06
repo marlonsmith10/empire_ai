@@ -15,16 +15,19 @@ Path::Path(TileIndex start, TileIndex end)
 	// Save start node
     m_current_node = m_start_node = get_node(start);
 	m_current_node->update_costs(m_current_node);
+	open_node(m_current_node);
 
 	m_end_tile_index = end;
+
+	m_status = IN_PROGRESS;
 }
 
 
-bool Path::find(uint16_t max_node_count)
+Path::Status Path::find(uint16_t max_node_count)
 {
-    if(m_path_found)
+    if(m_status != IN_PROGRESS)
     {
-        return true;
+        return m_status;
     }
 
 	// While not at end of path
@@ -33,13 +36,20 @@ bool Path::find(uint16_t max_node_count)
 	    // Find the cheapest open node
 	    m_current_node = cheapest_open_node();
 
+	    // If there are no more open nodes, the path can't be found
+	    if(m_current_node == nullptr)
+	    {
+	    	m_status = UNREACHABLE;
+			break;
+	    }
+
         // Mark the current node as closed
 	    close_node(m_current_node);
 
 	    // If we've reached the destination, return true
 	    if(m_current_node->tile_index == m_end_tile_index)
 	    {
-	        m_path_found = true;
+	    	m_status = FOUND;
 	        break;
 	    }
 
@@ -50,7 +60,7 @@ bool Path::find(uint16_t max_node_count)
 	    parse_adjacent_tile(m_current_node, 0, -1);
 	}
 
-	return m_path_found;
+	return m_status;
 }
 
 
@@ -99,6 +109,11 @@ Path::Node* Path::get_node(TileIndex tile_index)
 
 Path::Node* Path::cheapest_open_node()
 {
+	if(m_open_nodes.empty())
+	{
+		return nullptr;
+	}
+
     // Get the first open node to start
     Node* cheapest_open_node = m_open_nodes.front();
 
