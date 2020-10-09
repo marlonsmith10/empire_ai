@@ -31,7 +31,7 @@ Path::Status Path::find(uint16_t max_node_count)
     }
 
 	// While not at end of path
-	for(uint8 node_count = 0; node_count < max_node_count; node_count++)
+	for(uint16 node_count = 0; node_count < max_node_count; node_count++)
 	{
 	    // Find the cheapest open node
 	    m_current_node = cheapest_open_node();
