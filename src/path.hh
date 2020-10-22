@@ -54,12 +54,7 @@ namespace EmpireAI
 	        		return true;
 	        	}
 
-	        	if(f > other.f)
-	        	{
-	        		return true;
-	        	}
-
-	        	return false;
+	        	return true ? f > other.f : false;
 	        }
 	    };
 
