@@ -86,7 +86,9 @@ void Path::parse_adjacent_tile(Node& current_node, int8 x, int8 y)
 // Get the node from the closed set or create a new one
 Path::Node Path::get_node(TileIndex tile_index)
 {
-    // If the node does not already exist, create a new one
+    // If the node is not closed, create a new one
+	// Note that duplicate nodes are considered an acceptable tradeoff since it's not easy to search std::priority_queue for
+	// an already existing open node
     if(m_closed_nodes.find(tile_index) == m_closed_nodes.end())
     {
     	Node node(tile_index, ScriptMap::DistanceManhattan(tile_index, m_end_tile_index));
@@ -121,6 +123,8 @@ bool Path::Node::update_costs(Node& adjacent_node)
 
     int32 new_f = new_g + h;
 
+    // If this node is closed but cheaper than it was via previous path, or
+    // if this is a new node, return true to indicate the node should be opened again
     if(new_f < f || f == -1)
     {
         g = new_g;
@@ -130,9 +134,4 @@ bool Path::Node::update_costs(Node& adjacent_node)
     }
 
     return false;
-}
-
-
-Path::~Path()
-{
 }

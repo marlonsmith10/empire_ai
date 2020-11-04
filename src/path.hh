@@ -22,7 +22,6 @@ namespace EmpireAI
 		};
 
 		Path(TileIndex start, TileIndex end);
-		~Path();
 
 		// Find a partial path from start to end, returning true if the full path has been found
 		Status find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
@@ -36,7 +35,9 @@ namespace EmpireAI
 	        {
 	        }
 
-	        Node(){}
+	        Node()
+	        : tile_index(0), h(0)
+	        {}
 
 	        bool update_costs(Node& adjacent_node);
 
@@ -128,11 +129,13 @@ namespace EmpireAI
 
 		Iterator begin()
         {
+			// Path is traversed in reverse order of discovery, thus begin returns the end tile
             return Iterator(m_closed_nodes, m_end_tile_index);
         }
 
 		Iterator end()
         {
+			// Path is traversed in reverse order of discovery, thus end returns the start tile
             return Iterator(m_closed_nodes, m_start_tile_index);
         }
 	};
