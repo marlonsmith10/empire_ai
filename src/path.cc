@@ -33,16 +33,16 @@ Path::Status Path::find(uint16_t max_node_count)
 	// While not at end of path
 	for(uint16 node_count = 0; node_count < max_node_count; node_count++)
 	{
-	    // If there are no more open nodes, the path is unreachable
-		if(m_open_nodes.empty())
+		// Get the cheapest open node
+		bool open_node_available = false;
+		Node current_node = cheapest_open_node(open_node_available);
+
+		// If there are no open nodes, the path is unreachable
+		if(!open_node_available)
 		{
 			m_status = UNREACHABLE;
 			break;
 		}
-
-		// Get the cheapest open node
-		Node current_node = m_open_nodes.top();
-		m_open_nodes.pop();
 
 	    std::cout << "\nCurrent location: " << TileX(current_node.tile_index) << ", " << TileY(current_node.tile_index) << std::flush;
 
@@ -80,6 +80,21 @@ void Path::parse_adjacent_tile(Node& current_node, int8 x, int8 y)
             open_node(adjacent_node);
         }
     }
+}
+
+
+Path::Node Path::cheapest_open_node(bool& out_success)
+{
+	if(m_open_nodes.empty())
+	{
+		out_success = false;
+		return Node();
+	}
+
+	Node current_node = m_open_nodes.top();
+	m_open_nodes.pop();
+	out_success = true;
+	return current_node;
 }
 
 

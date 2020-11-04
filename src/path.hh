@@ -64,6 +64,9 @@ namespace EmpireAI
 		// Return the corresponding node or create a new one if none is found
 		Node get_node(TileIndex tile_index);
 
+		// Get the cheapest open node, return false if there are no open nodes
+		Node cheapest_open_node(bool& out_success);
+
 		// Check this many nodes per call of find()
 		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
 
