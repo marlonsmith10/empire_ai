@@ -39,6 +39,8 @@ namespace EmpireAI
 	        : tile_index(0), h(0)
 	        {}
 
+	        // Update the Node's g and h values, as well as its previous node. Returns true if the
+	        // new values are lower than the previous ones.
 	        bool update_costs(Node& adjacent_node);
 
 	        TileIndex tile_index;
