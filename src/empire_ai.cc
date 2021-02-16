@@ -73,15 +73,16 @@ void AI::game_loop()
 	        m_path = new Path(town1_location, town2_location);
 	    }
 
+	    std::cout << "\nFinding path..." << std::flush;
 	    m_state = FIND_PATH;
 	    break;
 	}
 	case FIND_PATH:
 	{
-	    std::cout << "\nFinding path..." << std::flush;
-	    Path::Status find_status = m_path->find();
+	    Path::Status find_status = m_path->find(40);
 	    if(find_status == Path::FOUND)
 	    {
+		    std::cout << "\nBuilding road..." << std::flush;
             m_state = BUILD_ROAD;
 	    }
 	    if(find_status == Path::UNREACHABLE)
@@ -92,17 +93,19 @@ void AI::game_loop()
 	    break;
 	}
 	case BUILD_ROAD:
-	    std::cout << "\nBuilding road..." << std::flush;
-
 	    if(m_road_builder == nullptr)
 	    {
 	        m_road_builder = new RoadBuilder(*m_path);
 	    }
 
-	    if(m_road_builder->build_road_segment())
+	    for(uint8_t count = 0; count < 2; count++)
 	    {
-	    	std::cout << "\nConstruction complete!" << std::flush;
-	        m_state = DONE;
+			if(m_road_builder->build_road_segment())
+			{
+				std::cout << "\nConstruction complete!" << std::flush;
+				m_state = DONE;
+				break;
+			}
 	    }
 
 	    break;

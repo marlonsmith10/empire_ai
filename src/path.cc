@@ -44,7 +44,12 @@ Path::Status Path::find(uint16_t max_node_count)
 			break;
 		}
 
-	    std::cout << "\nCurrent location: " << TileX(current_node.tile_index) << ", " << TileY(current_node.tile_index) << std::flush;
+	    //std::cout << "\nCurrent location: " << TileX(current_node.tile_index) << ", " << TileY(current_node.tile_index) << std::flush;
+	    //std::cout << "  f: " << current_node.f << " g(from start): " << current_node.g << " h(from end) " << current_node.h << std::flush;
+	    //std::cout << " from node: " << TileX(current_node.previous_tile_index) << ", " << TileY(current_node.previous_tile_index) << std::flush;
+
+	    // Bulldoze to indicate where we're searching
+	    //DoCommand(current_node.tile_index, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
 
         // Mark the current node as closed
 	    close_node(current_node);
@@ -71,32 +76,45 @@ void Path::parse_adjacent_tile(Node& current_node, int8 x, int8 y)
 {
     TileIndex adjacent_tile_index = current_node.tile_index + ScriptMap::GetTileIndex(x, y);
 
+    Node adjacent_node = get_node(adjacent_tile_index);
+
     // Create a node for this tile only if it is buildable
     if(ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index))
     {
-        Node adjacent_node = get_node(adjacent_tile_index);
         if(adjacent_node.update_costs(current_node))
         {
             open_node(adjacent_node);
         }
+    }
+    else
+    {
+    	close_node(adjacent_node);
     }
 }
 
 
 Path::Node Path::cheapest_open_node(bool& out_success)
 {
-	// If there are no open nodes, indicate no success
-	if(m_open_nodes.empty())
+	// While there are open nodes available
+	while(!m_open_nodes.empty())
 	{
-		out_success = false;
-		return Node();
+		// Remove the cheapest node from the open nodes list
+		Node current_node = m_open_nodes.top();
+		m_open_nodes.pop();
+
+		// If this node has already been closed, skip to the next one
+		if(m_closed_nodes.find(current_node.tile_index) != m_closed_nodes.end())
+		{
+			continue;
+		}
+
+		out_success = true;
+		return current_node;
 	}
 
-	// Remove the cheapest node from the open nodes list and return it
-	Node current_node = m_open_nodes.top();
-	m_open_nodes.pop();
-	out_success = true;
-	return current_node;
+	// There are no more open nodes
+	out_success = false;
+	return Node();
 }
 
 
@@ -111,7 +129,8 @@ Path::Node Path::get_node(TileIndex tile_index)
     	return node;
     }
 
-    return m_closed_nodes.at(tile_index);
+    Node node = m_closed_nodes.at(tile_index);
+    return node;
 }
 
 
