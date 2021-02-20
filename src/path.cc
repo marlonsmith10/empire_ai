@@ -5,19 +5,19 @@
 #include "script_tile.hpp"
 
 #include <algorithm>
-#include <iostream>
 
 using namespace EmpireAI;
 
 
 Path::Path(TileIndex start, TileIndex end)
 {
+	// Set the end tile index first, as it is needed for node cost calculations
+	m_end_tile_index = end;
+
 	// Create an open node at the start
 	m_current_node = m_start_node = get_node(start);
-    m_current_node->f = m_current_node->h;
+	m_start_node->f = m_start_node->h;
 	open_node(m_current_node);
-
-	m_end_tile_index = end;
 
 	m_status = IN_PROGRESS;
 }
@@ -101,7 +101,8 @@ Path::Node* Path::cheapest_open_node()
 		Node* current_node = m_open_nodes.top();
 		m_open_nodes.pop();
 
-		// If this node has already been closed, skip to the next one
+		// If this node has already been closed, skip to the next one. Duplicates are expected
+		// here because open_node() doesn't check for duplicates for performance reasons.
 		if(m_closed_nodes.find(current_node->tile_index) != m_closed_nodes.end())
 		{
 			continue;
@@ -133,7 +134,7 @@ void Path::open_node(Node* node)
 {
 	// Push the node into the open node list. Does not check open nodes, instead allowing
 	// duplicates to be created in the open node priority queue, since checking for already open nodes is slower
-	// than just processing a node twice
+	// than just processing a node twice.
 	m_open_nodes.push(node);
 
 	// Remove the node from the closed list

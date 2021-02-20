@@ -7,7 +7,6 @@
 #include <queue>
 #include <unordered_map>
 
-
 namespace EmpireAI
 {
 	class Path
@@ -150,7 +149,7 @@ namespace EmpireAI
 
 		Iterator end()
         {
-            return Iterator(m_start_node);
+            return Iterator(nullptr);
         }
 	};
 }
