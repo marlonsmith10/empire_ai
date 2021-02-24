@@ -105,6 +105,7 @@ Path::Node* Path::cheapest_open_node()
 		// here because open_node() doesn't check for duplicates for performance reasons.
 		if(m_closed_nodes.find(current_node->tile_index) != m_closed_nodes.end())
 		{
+			delete current_node;
 			continue;
 		}
 
