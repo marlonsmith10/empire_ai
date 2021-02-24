@@ -1,0 +1,13 @@
+path.hh
+
+Node pointers are stored in open and closed lists instead of Node objects for several reasons:
+1. Iterator can use nullptr to determine the Node before the start Node, which can't be done using TileIndex since all values of TileIndex are valid.
+2. Node member variables can be marked as const, which can't be done if they are stored directly in the containers.
+3. cheapest_open_node can return nullptr instead of having to take in and modify a status variable.
+
+Notes on smart pointers.
+1. std::shared_ptr more than doubles computation time compared to raw pointers:
+	shared_ptr average time while finding: start at 0.85, slowly lowers to .84, .83
+	shared_ptr ~Path() time: 0.0197494 seconds
+	raw average time while finding: start at 0.36
+	raw ~Path() time: 0.0108117 seconds

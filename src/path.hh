@@ -79,13 +79,7 @@ namespace EmpireAI
 		Node* m_current_node;
 		TileIndex m_end_tile_index;
 
-		// Containers for open and closed nodes. Node pointers are stored here instead of Node objects
-		// for several reasons:
-		// 1. Iterator can use nullptr to determine the Node before the start Node, which can't be
-		// done using TileIndex since all values of TileIndex are valid.
-		// 2. Node member variables can be marked as const, which can't be done if they are stored
-		// directly in the containers.
-		// 3. cheapest_open_node can return nullptr instead of having to take in and modify a status variable.
+		// Containers for open and closed nodes
 		std::unordered_map<TileIndex, Node*> m_closed_nodes;
 		std::priority_queue<Node*, std::vector<Node*>, NodeCostCompare> m_open_nodes;
 
