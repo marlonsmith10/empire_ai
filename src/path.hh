@@ -21,7 +21,6 @@ namespace EmpireAI
 		};
 
 		Path(TileIndex start, TileIndex end);
-		~Path();
 
 		// Find a partial path from start to end, returning true if the full path has been found
 		Status find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
@@ -52,7 +51,7 @@ namespace EmpireAI
 
 	    struct NodeCostCompare
 	    {
-	    	bool operator()(const Node* node1, const Node* node2)
+	    	bool operator()(const std::unique_ptr<Node>& node1, const std::unique_ptr<Node>& node2)
 			{
 				return node1->f > node2->f;
 			}
@@ -62,26 +61,26 @@ namespace EmpireAI
 		void parse_adjacent_tile(Node* current_node, int8 x, int8 y);
 
 		// Return the corresponding node or create a new one if none is found
-		Node* get_node(TileIndex tile_index);
+		std::unique_ptr<Node> get_node(TileIndex tile_index);
 
 		// Get the cheapest open node, returns nullptr if there are no open nodes
-		Node* cheapest_open_node();
+		std::unique_ptr<Node> cheapest_open_node();
 
 		// Check this many nodes per call of find()
 		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
 
-		void open_node(Node* node);
-		void close_node(Node* node);
+		void open_node(std::unique_ptr<Node> node);
+		void close_node(std::unique_ptr<Node> node);
 
 		Status m_status;
 
 		Node* m_start_node;
-		Node* m_current_node;
+		Node* m_end_node;
 		TileIndex m_end_tile_index;
 
 		// Containers for open and closed nodes
-		std::unordered_map<TileIndex, Node*> m_closed_nodes;
-		std::priority_queue<Node*, std::vector<Node*>, NodeCostCompare> m_open_nodes;
+		std::unordered_map<TileIndex, std::unique_ptr<Node>> m_closed_nodes;
+		std::priority_queue<Node*, std::vector<std::unique_ptr<Node>>, NodeCostCompare> m_open_nodes;
 
 	public:
 
@@ -138,12 +137,12 @@ namespace EmpireAI
 
 		Iterator begin()
         {
-            return Iterator(m_current_node);
+            return Iterator(m_end_node);
         }
 
 		Iterator end()
         {
-            return Iterator(nullptr);
+            return Iterator(m_start_node);
         }
 	};
 }
