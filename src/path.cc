@@ -102,7 +102,7 @@ Path::Node* Path::cheapest_open_node()
 		m_open_nodes.pop();
 
 		// If this node has already been closed, skip to the next one. Duplicates are expected
-		// here because open_node() doesn't check for duplicates for performance reasons.
+		// here because get_node() doesn't check for duplicates for performance reasons.
 		if(m_closed_nodes.find(current_node->tile_index) != m_closed_nodes.end())
 		{
 			delete current_node;
