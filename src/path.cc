@@ -44,13 +44,6 @@ Path::Status Path::find(uint16_t max_node_count)
 			break;
 		}
 
-	    //std::cout << "\nCurrent location: " << TileX(current_node.tile_index) << ", " << TileY(current_node.tile_index) << std::flush;
-	    //std::cout << "  f: " << current_node.f << " g(from start): " << current_node.g << " h(from end) " << current_node.h << std::flush;
-	    //std::cout << " from node: " << TileX(current_node.previous_tile_index) << ", " << TileY(current_node.previous_tile_index) << std::flush;
-
-	    // Bulldoze to indicate where we're searching
-	    //DoCommand(current_node->tile_index, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
-
         // Mark the current node as closed
 	    close_node(m_current_node);
 

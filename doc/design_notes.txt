@@ -11,3 +11,30 @@ Notes on smart pointers.
 	shared_ptr ~Path() time: 0.0197494 seconds
 	raw average time while finding: start at 0.36
 	raw ~Path() time: 0.0108117 seconds
+	
+
+Debug code that can be pasted in for quick debug output:
+
+Debug code that can be placed in Path::find():
+
+std::cout << "\nCurrent location: " << TileX(current_node.tile_index) << ", " << TileY(current_node.tile_index) << std::flush;
+std::cout << "  f: " << current_node.f << " g(from start): " << current_node.g << " h(from end) " << current_node.h << std::flush;
+std::cout << " from node: " << TileX(current_node.previous_tile_index) << ", " << TileY(current_node.previous_tile_index) << std::flush;
+
+// Bulldoze to indicate where we're searching
+DoCommand(current_node->tile_index, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+
+
+// ScriptRoad example: ScriptRoad::IsRoadTile(tile_index);
+// Get tile index: TileIndex tile_index = TileXY(x, y);
+// Build road: DoCommand(tile_index, ROAD_X | (ROADTYPE_ROAD << 4), 0, DC_EXEC | DC_AUTO, CMD_BUILD_ROAD);
+// Clear landscape: DoCommand(tile_index, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+// Get error message from command:    if(cost.GetErrorMessage() != INVALID_STRING_ID)
+									//{
+									//	char buf[MAX_LENGTH_TOWN_NAME_CHARS * MAX_CHAR_LENGTH];
+									//	char *end = GetString(buf, cost.GetErrorMessage(), lastof(buf));
+									//	std::cout << "\nMessage: " << buf << std::flush;
+									//}
+// Get town location: TileIndex town1_location = ScriptTown::GetLocation(town1_id);
+// Town valid?: TownID town1_id = 0; Town* town1 = Town::GetIfValid(town1_id);
+// Iterate over all towns: for (const Town *t : Town::Iterate())
