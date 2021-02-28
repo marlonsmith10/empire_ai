@@ -3,6 +3,7 @@
 #include "script_map.hpp"
 #include "script_road.hpp"
 #include "script_tile.hpp"
+#include "map_func.h"
 
 #include <algorithm>
 
@@ -77,8 +78,11 @@ void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
 
     Node* adjacent_node = get_node(adjacent_tile_index);
 
-    // Create a node for this tile only if it is buildable
-    if(ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index))
+    // Check to see if this tile can be used as part of the path:
+    // 1. If this tile can support a road or already contains a road and
+    // 2. If the tile is sloped in the right direction or can be landscaped to slope the right direction
+    if((ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index)) &&
+    		slope_can_support_road(current_node, adjacent_node))
     {
         if(adjacent_node->update_costs(current_node))
         {
@@ -89,6 +93,37 @@ void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
     {
     	close_node(adjacent_node);
     }
+}
+
+
+// Returns true if the slope between these two nodes can support a road
+bool Path::slope_can_support_road(const Node* node_from, const Node* node_to) const
+{
+    // Get the slope of the tile to be connected to
+    ScriptTile::Slope slope = ScriptTile::GetSlope(node_to->tile_index);
+
+    // Get the direction of the road from the current tile to the adjacent tile
+    DiagDirection direction = DiagdirBetweenTiles(node_from->tile_index, node_to->tile_index);
+
+    // Check to see if the slope of the tile can handle the road in this direction
+    if(slope != ScriptTile::SLOPE_FLAT)
+	{
+    	// Check to see if a road can be built in the correct direction
+    	if((direction == DIAGDIR_NW || direction ==  DIAGDIR_SE) &&
+    			(slope == ScriptTile::SLOPE_NW || slope ==  ScriptTile::SLOPE_SE))
+    	{
+    	}
+    	else if((direction == DIAGDIR_NE || direction ==  DIAGDIR_SW) &&
+    			(slope == ScriptTile::SLOPE_NE || slope ==  ScriptTile::SLOPE_SW))
+		{
+		}
+    	else
+    	{
+    		return false;
+    	}
+	}
+
+    return true;
 }
 
 
