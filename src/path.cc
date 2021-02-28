@@ -71,9 +71,7 @@ void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
 
     Node* adjacent_node = get_node(adjacent_tile_index);
 
-    // Check to see if this tile can be used as part of the path:
-    // 1. If this tile can support a road or already contains a road and
-    // 2. If the tile is sloped in the right direction or can be landscaped to slope the right direction
+    // Check to see if this tile can be used as part of the path
     if((ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index)) &&
     		slope_can_support_road(current_node, adjacent_node))
     {
