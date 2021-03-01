@@ -20,10 +20,10 @@ namespace EmpireAI
 			UNREACHABLE
 		};
 
-		Path(TileIndex start, TileIndex end);
+		Path(const TileIndex start, const TileIndex end);
 
 		// Find a partial path from start to end, returning true if the full path has been found
-		Status find(uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
+		Status find(const uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
 
 	private:
 
@@ -40,7 +40,7 @@ namespace EmpireAI
 
 	        // Update the Node's g and h values, as well as its previous node. Returns true if the
 	        // new values are lower than the previous ones.
-	        bool update_costs(Node* adjacent_node);
+	        bool update_costs(Node* const adjacent_node);
 
 	        const TileIndex tile_index;
 	        Node* previous_node = nullptr;
@@ -58,13 +58,16 @@ namespace EmpireAI
 	    };
 
 
-		void parse_adjacent_tile(Node* current_node, int8 x, int8 y);
+		void parse_adjacent_tile(Node* const current_node, const int8 x, const int8 y);
 
 		// Return the corresponding node or create a new one if none is found
-		std::unique_ptr<Node> get_node(TileIndex tile_index);
+		std::unique_ptr<Node> get_node(const TileIndex tile_index);
 
 		// Get the cheapest open node, returns nullptr if there are no open nodes
 		std::unique_ptr<Node> cheapest_open_node();
+
+		// Returns true if the slope between these two nodes can support a road
+		bool slope_can_support_road(const Node* const node_from, const Node* const node_to) const;
 
 		// Check this many nodes per call of find()
 		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
@@ -76,7 +79,7 @@ namespace EmpireAI
 
 		Node* m_start_node;
 		Node* m_end_node;
-		TileIndex m_end_tile_index;
+		const TileIndex m_end_tile_index;
 
 		// Containers for open and closed nodes
 		std::unordered_map<TileIndex, std::unique_ptr<Node>> m_closed_nodes;

@@ -3,17 +3,16 @@
 #include "script_map.hpp"
 #include "script_road.hpp"
 #include "script_tile.hpp"
+#include "map_func.h"
 
 #include <algorithm>
 
 using namespace EmpireAI;
 
 
-Path::Path(TileIndex start, TileIndex end)
+Path::Path(const TileIndex start, const TileIndex end)
+: m_end_tile_index(end)
 {
-	// Set the end tile index first, as it is needed for node cost calculations
-	m_end_tile_index = end;
-
 	// Create an open node at the start
 	std::unique_ptr<Node> start_node = get_node(start);
 	start_node->f = start_node->h;
@@ -27,7 +26,7 @@ Path::Path(TileIndex start, TileIndex end)
 }
 
 
-Path::Status Path::find(uint16_t max_node_count)
+Path::Status Path::find(const uint16_t max_node_count)
 {
     if(m_status != IN_PROGRESS)
     {
@@ -46,13 +45,6 @@ Path::Status Path::find(uint16_t max_node_count)
 			m_status = UNREACHABLE;
 			break;
 		}
-
-	    //std::cout << "\nCurrent location: " << TileX(current_node->tile_index) << ", " << TileY(current_node->tile_index) << std::flush;
-	    //std::cout << "  f: " << current_node->f << " g(from start): " << current_node->g << " h(from end) " << current_node->h << std::flush;
-	    //std::cout << " from node: " << TileX(current_node->previous_node->tile_index) << ", " << TileY(current_node->previous_node->tile_index) << std::flush;
-
-	    // Bulldoze to indicate where we're searching
-	    //DoCommand(current_node->tile_index, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
 
 	    // If we've reached the destination, return true
 	    if(current_node->tile_index == m_end_tile_index)
@@ -78,14 +70,15 @@ Path::Status Path::find(uint16_t max_node_count)
 }
 
 
-void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
+void Path::parse_adjacent_tile(Node* const current_node, const int8 x, const int8 y)
 {
     TileIndex adjacent_tile_index = current_node->tile_index + ScriptMap::GetTileIndex(x, y);
 
     std::unique_ptr<Node> adjacent_node = get_node(adjacent_tile_index);
 
-    // Create a node for this tile only if it is buildable
-    if(ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index))
+    // Check to see if this tile can be used as part of the path
+    if((ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index)) &&
+    		slope_can_support_road(current_node, adjacent_node.get()))
     {
         if(adjacent_node->update_costs(current_node))
         {
@@ -103,6 +96,37 @@ void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
 }
 
 
+// Returns true if the slope between these two nodes can support a road
+bool Path::slope_can_support_road(const Node* const node_from, const Node* const node_to) const
+{
+    // Get the slope of the tile to be connected to
+    ScriptTile::Slope slope = ScriptTile::GetSlope(node_to->tile_index);
+
+    // Get the direction of the road from the current tile to the adjacent tile
+    DiagDirection direction = DiagdirBetweenTiles(node_from->tile_index, node_to->tile_index);
+
+    // Check to see if the slope of the tile can handle the road in this direction
+    if(slope != ScriptTile::SLOPE_FLAT)
+	{
+    	// Check to see if a road can be built in the correct direction
+    	if((direction == DIAGDIR_NW || direction ==  DIAGDIR_SE) &&
+    			(slope == ScriptTile::SLOPE_NW || slope ==  ScriptTile::SLOPE_SE))
+    	{
+    	}
+    	else if((direction == DIAGDIR_NE || direction ==  DIAGDIR_SW) &&
+    			(slope == ScriptTile::SLOPE_NE || slope ==  ScriptTile::SLOPE_SW))
+		{
+		}
+    	else
+    	{
+    		return false;
+    	}
+	}
+
+    return true;
+}
+
+
 std::unique_ptr<Path::Node> Path::cheapest_open_node()
 {
 	// While there are open nodes available
@@ -113,7 +137,7 @@ std::unique_ptr<Path::Node> Path::cheapest_open_node()
 		m_open_nodes.pop();
 
 		// If this node has already been closed, skip to the next one. Duplicates are expected
-		// here because open_node() doesn't check for duplicates for performance reasons.
+		// here because get_node() doesn't check for duplicates for performance reasons.
 		if(m_closed_nodes.find(current_node->tile_index) != m_closed_nodes.end())
 		{
 			continue;
@@ -127,7 +151,7 @@ std::unique_ptr<Path::Node> Path::cheapest_open_node()
 }
 
 
-std::unique_ptr<Path::Node> Path::get_node(TileIndex tile_index)
+std::unique_ptr<Path::Node> Path::get_node(const TileIndex tile_index)
 {
     // If the node is not closed, create a new one.
 	// Duplicate open nodes are considered an acceptable tradeoff since it's not easy to search std::priority_queue for
@@ -161,7 +185,7 @@ void Path::close_node(std::unique_ptr<Node> node)
 }
 
 
-bool Path::Node::update_costs(Node* adjacent_node)
+bool Path::Node::update_costs(Node* const adjacent_node)
 {
     int32 new_g = adjacent_node->g + 1;
 
