@@ -67,6 +67,9 @@ namespace EmpireAI
 		// Get the cheapest open node, returns nullptr if there are no open nodes
 		Node* cheapest_open_node();
 
+		// Returns true if the slope between these two nodes can support a road
+		bool slope_can_support_road(const Node* node_from, const Node* node_to) const;
+
 		// Check this many nodes per call of find()
 		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
 
