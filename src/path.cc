@@ -10,11 +10,9 @@
 using namespace EmpireAI;
 
 
-Path::Path(TileIndex start, TileIndex end)
+Path::Path(const TileIndex start, const TileIndex end)
+: m_end_tile_index(end)
 {
-	// Set the end tile index first, as it is needed for node cost calculations
-	m_end_tile_index = end;
-
 	// Create an open node at the start
 	m_current_node = m_start_node = get_node(start);
 	m_start_node->f = m_start_node->h;
@@ -24,7 +22,7 @@ Path::Path(TileIndex start, TileIndex end)
 }
 
 
-Path::Status Path::find(uint16_t max_node_count)
+Path::Status Path::find(const uint16_t max_node_count)
 {
     if(m_status != IN_PROGRESS)
     {
@@ -65,7 +63,7 @@ Path::Status Path::find(uint16_t max_node_count)
 }
 
 
-void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
+void Path::parse_adjacent_tile(Node* const current_node, const int8 x, const int8 y)
 {
     TileIndex adjacent_tile_index = current_node->tile_index + ScriptMap::GetTileIndex(x, y);
 
@@ -88,7 +86,7 @@ void Path::parse_adjacent_tile(Node* current_node, int8 x, int8 y)
 
 
 // Returns true if the slope between these two nodes can support a road
-bool Path::slope_can_support_road(const Node* node_from, const Node* node_to) const
+bool Path::slope_can_support_road(const Node* const node_from, const Node* const node_to) const
 {
     // Get the slope of the tile to be connected to
     ScriptTile::Slope slope = ScriptTile::GetSlope(node_to->tile_index);
@@ -143,7 +141,7 @@ Path::Node* Path::cheapest_open_node()
 }
 
 
-Path::Node* Path::get_node(TileIndex tile_index)
+Path::Node* Path::get_node(const TileIndex tile_index)
 {
     // If the node is not closed, create a new one.
 	// Duplicate open nodes are considered an acceptable tradeoff since it's not easy to search std::priority_queue for
@@ -175,7 +173,7 @@ void Path::close_node(Node* node)
 }
 
 
-bool Path::Node::update_costs(Node* adjacent_node)
+bool Path::Node::update_costs(Node* const adjacent_node)
 {
     int32 new_g = adjacent_node->g + 1;
 
