@@ -70,8 +70,7 @@ void Path::parse_adjacent_tile(Node* const current_node, const int8 x, const int
     Node* adjacent_node = get_node(adjacent_tile_index);
 
     // Check to see if this tile can be used as part of the path
-    if((ScriptTile::IsBuildable(adjacent_tile_index) || ScriptRoad::IsRoadTile(adjacent_tile_index)) &&
-    		slope_can_support_road(current_node, adjacent_node))
+    if(nodes_can_connect_road(current_node, adjacent_node))
     {
         if(adjacent_node->update_costs(current_node))
         {
@@ -85,34 +84,28 @@ void Path::parse_adjacent_tile(Node* const current_node, const int8 x, const int
 }
 
 
-// Returns true if the slope between these two nodes can support a road
-bool Path::slope_can_support_road(const Node* const node_from, const Node* const node_to) const
+bool Path::nodes_can_connect_road(const Node* const node_from, const Node* const node_to) const
 {
-    // Get the slope of the tile to be connected to
-    ScriptTile::Slope slope = ScriptTile::GetSlope(node_to->tile_index);
-
-    // Get the direction of the road from the current tile to the adjacent tile
-    DiagDirection direction = DiagdirBetweenTiles(node_from->tile_index, node_to->tile_index);
-
-    // Check to see if the slope of the tile can handle the road in this direction
-    if(slope != ScriptTile::SLOPE_FLAT)
+	// The start node doesn't connect to a previous node, so we can't check it for the correct slope.
+	// The pathfinder can only ensure that the next node in the path can connect to the start node.
+	if(node_from->previous_node == nullptr)
 	{
-    	// Check to see if a road can be built in the correct direction
-    	if((direction == DIAGDIR_NW || direction ==  DIAGDIR_SE) &&
-    			(slope == ScriptTile::SLOPE_NW || slope ==  ScriptTile::SLOPE_SE))
-    	{
-    	}
-    	else if((direction == DIAGDIR_NE || direction ==  DIAGDIR_SW) &&
-    			(slope == ScriptTile::SLOPE_NE || slope ==  ScriptTile::SLOPE_SW))
-		{
-		}
-    	else
-    	{
-    		return false;
-    	}
+		return true;
 	}
 
-    return true;
+	int32 supports_road = ScriptRoad::CanBuildConnectedRoadPartsHere(node_from->tile_index, node_from->previous_node->tile_index, node_to->tile_index);
+
+	if(supports_road <= 0)
+	{
+		return false;
+	}
+
+	if(!ScriptTile::IsBuildable(node_to->tile_index) && !ScriptRoad::IsRoadTile(node_to->tile_index))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 
