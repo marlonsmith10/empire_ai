@@ -129,7 +129,7 @@ std::unique_ptr<Path::Node> Path::cheapest_open_node()
 		std::unique_ptr<Node> current_node = std::move(const_cast<std::unique_ptr<Node>&>(m_open_nodes.top()));
 		m_open_nodes.pop();
 
-		// If this node has already been closed, skip to the next one. Duplicates are expected
+		// If this node has already been closed, discard it and skip to the next one. Duplicates are expected
 		// here because get_node() doesn't check for duplicates for performance reasons.
 		if(m_closed_nodes.find(current_node->tile_index) != m_closed_nodes.end())
 		{
