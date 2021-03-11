@@ -103,7 +103,7 @@ bool Path::nodes_can_connect_road(const Node& node_from, const Node& node_to)
 		return false;
 	}
 
-	if(!ScriptTile::IsBuildable(node_to.tile_index) && !ScriptRoad::IsRoadTile(node_to.tile_index))
+	if(!ScriptTile::IsBuildable(node_from.tile_index) && !ScriptRoad::IsRoadTile(node_from.tile_index))
 	{
 		return false;
 	}
