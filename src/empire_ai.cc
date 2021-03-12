@@ -79,7 +79,7 @@ void AI::game_loop()
 	}
 	case FIND_PATH:
 	{
-	    Path::Status find_status = m_path->find(40);
+	    Path::Status find_status = m_path->find(100);
 	    if(find_status == Path::FOUND)
 	    {
 		    std::cout << "\nBuilding road..." << std::flush;
