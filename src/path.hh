@@ -1,3 +1,4 @@
+/// \file
 #ifndef PATH_HH
 #define PATH_HH
 
