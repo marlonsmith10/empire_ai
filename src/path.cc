@@ -1,3 +1,4 @@
+/// \file
 #include "path.hh"
 
 #include "script_map.hpp"
