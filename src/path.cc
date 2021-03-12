@@ -82,8 +82,8 @@ Path::Status Path::find(const uint16_t max_node_count)
  * it can be reached more cheaply via this current node than the node is was previously reached through,
  * add it to the list of open nodes to be examined later. Otherwise, add it to the closed node list.
  * @param[in] current_node The current node.
- * @param x[in] X offset of the adjacent node to be examined.
- * @param y[in] Y offset of the adjacent node to be examined.
+ * @param[in] x X offset of the adjacent node to be examined.
+ * @param[in] y Y offset of the adjacent node to be examined.
  */
 void Path::parse_adjacent_tile(const Node& current_node, const int8 x, const int8 y)
 {
