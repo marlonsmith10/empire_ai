@@ -10,24 +10,32 @@
 
 namespace EmpireAI
 {
+	/**
+	 * Pathfinder class that uses the A* algorithm to find the shortest path of a potential road
+	 * between two map tiles.
+	 */
 	class Path
 	{
 	public:
 
+		/**
+		 * Enum representing the status of the pathfinder.
+		 */
 		enum Status
 		{
-			IN_PROGRESS,
-			FOUND,
-			UNREACHABLE
+			IN_PROGRESS, ///< Still searching for a path.
+			FOUND,       ///< A path has been found.
+			UNREACHABLE  ///< Pathfinder was unable to find a path.
 		};
 
 		Path(const TileIndex start, const TileIndex end);
-
-		// Find a partial path from start to end, returning true if the full path has been found
 		Status find(const uint16_t max_node_count = DEFAULT_NODE_COUNT_PER_FIND);
 
 	private:
 
+		/**
+		 * Path node representing one tile on the map.
+		 */
 	    struct Node
 	    {
 	        Node(TileIndex in_tile_index, int32 in_h)
@@ -39,6 +47,12 @@ namespace EmpireAI
 	        : tile_index(0), h(0)
 	        {}
 
+	        /**
+	         * Compare the cost of this node with another node. If the f cost is the same,
+	         * consider the node with the lower h cost to be cheaper.
+	         * @param other
+	         * @return
+	         */
 	        bool operator>(const Node& other) const
 	        {
 	        	if(f == other.f && h > other.h)
@@ -49,29 +63,21 @@ namespace EmpireAI
 				return true ? f > other.f : false;
 	        }
 
-	        // Update the Node's g and h values, as well as its previous node. Returns true if the
-	        // new values are lower than the previous ones.
 	        bool update_costs(const Node& adjacent_node);
 
-	        TileIndex tile_index;
-	        TileIndex previous_tile_index = INVALID_TILE;
-	        int32 g = 0;
-	        int32 h;
-	        int32 f = -1;
+	        TileIndex tile_index; ///< The tile that this node represents.
+	        TileIndex previous_tile_index = INVALID_TILE; ///< The tile that directly preceeds this node in the current path.
+	        int32 g = 0; ///< Cost of the path from the start node to this node.
+	        int32 h; ///< Cost of the path from this node to the end node.
+	        int32 f = -1; ///< Cost of the total path from start to end via this node.
 	    };
 
 		void parse_adjacent_tile(const Node& current_node, const int8 x, const int8 y);
-
-		// Return the corresponding node or create a new one if none is found
 		Node get_node(const TileIndex tile_index);
-
-		// Get the cheapest open node, returns nullptr if there are no open nodes
 		Node cheapest_open_node(bool& success);
-
-		// Returns true if a road can be built from one node to the next
 		bool nodes_can_connect_road(const Node& node_from, const Node& node_to);
 
-		// Check this many nodes per call of find()
+		/// Check up to this many nodes per call of find() by default
 		static const uint16 DEFAULT_NODE_COUNT_PER_FIND = 20;
 
 		void open_node(const Node& node);
@@ -82,13 +88,15 @@ namespace EmpireAI
 		const TileIndex m_start_tile_index;
 		const TileIndex m_end_tile_index;
 
-		// Containers for open and closed nodes
-		std::unordered_map<TileIndex, Node> m_closed_nodes;
-		std::priority_queue<Node, std::vector<Node>, std::greater<Node>> m_open_nodes;
+		std::unordered_map<TileIndex, Node> m_closed_nodes; ///< The list of closed nodes.
+		std::priority_queue<Node, std::vector<Node>, std::greater<Node>> m_open_nodes; ///< The list of open nodes.
 
 	public:
 
 
+		/**
+		 * Once a path has been found, the iterator can be used to traverse the path.
+		 */
         class Iterator
         {
         public:

@@ -9,7 +9,11 @@
 
 using namespace EmpireAI;
 
-
+/// Construct a new pathfinder.
+/**
+ * @param[in] start The tile at the start of the path to find.
+ * @param[in] end The The tile at the end of the path to find.
+ */
 Path::Path(const TileIndex start, const TileIndex end)
 : m_start_tile_index(start), m_end_tile_index(end)
 {
@@ -22,6 +26,13 @@ Path::Path(const TileIndex start, const TileIndex end)
 }
 
 
+/// Find a partial path from start to end, returning true if the full path has been found.
+/**
+ * This function must be called repeatedly until either a path is found or the pathfinder
+ * discovers that the path is unreachable.
+ * @param[in] max_node_count The maximum amount of nodes to search before returning.
+ * @return The status of the pathfinder.
+ */
 Path::Status Path::find(const uint16_t max_node_count)
 {
     if(m_status != IN_PROGRESS)
@@ -64,6 +75,15 @@ Path::Status Path::find(const uint16_t max_node_count)
 }
 
 
+/// Examine a node adjacent to the current node.
+/**
+ * If the adjacent node has not yet been examined, or
+ * it can be reached more cheaply via this current node than the node is was previously reached through,
+ * add it to the list of open nodes to be examined later. Otherwise, add it to the closed node list.
+ * @param[in] current_node The current node.
+ * @param x[in] X offset of the adjacent node to be examined.
+ * @param y[in] Y offset of the adjacent node to be examined.
+ */
 void Path::parse_adjacent_tile(const Node& current_node, const int8 x, const int8 y)
 {
     TileIndex adjacent_tile_index = current_node.tile_index + ScriptMap::GetTileIndex(x, y);
@@ -85,6 +105,12 @@ void Path::parse_adjacent_tile(const Node& current_node, const int8 x, const int
 }
 
 
+/// Determine whether a road can be built on the first node in the direction of the second node.
+/**
+ * @param[in] node_from Node to be examined.
+ * @param[in] node_to Node to be connected to the first node.
+ * @return
+ */
 bool Path::nodes_can_connect_road(const Node& node_from, const Node& node_to)
 {
 	// The start node doesn't connect to a previous node, so we can't check it for the correct slope.
@@ -112,6 +138,11 @@ bool Path::nodes_can_connect_road(const Node& node_from, const Node& node_to)
 }
 
 
+/// Get the open node with the cheapest f cost.
+/**
+ * @param[out] success Set to false if there are no open nodes, otherwise true.
+ * @return The cheapest open node.
+ */
 Path::Node Path::cheapest_open_node(bool& success)
 {
 	success = false;
@@ -139,11 +170,16 @@ Path::Node Path::cheapest_open_node(bool& success)
 }
 
 
+/// Return the closed node corresponding to this tile. If there is no closed node for this tile, create a new node.
+/**
+ * Duplicate open nodes are considered an acceptable tradeoff since it's not easy to search std::priority_queue
+ * for an already existing open node.
+ * @param[in] tile_index Tile index of the node to be returned.
+ * @return
+ */
 Path::Node Path::get_node(const TileIndex tile_index)
 {
-    // If the node is not closed, create a new one.
-	// Duplicate open nodes are considered an acceptable tradeoff since it's not easy to search std::priority_queue for
-	// an already existing open node
+    // If the node is not closed, create a new one
     if(m_closed_nodes.find(tile_index) == m_closed_nodes.end())
     {
     	return Node(tile_index, ScriptMap::DistanceManhattan(tile_index, m_end_tile_index));
@@ -153,6 +189,11 @@ Path::Node Path::get_node(const TileIndex tile_index)
 }
 
 
+/// Place this node into the open nodes list. If the node was previously in the closed nodes list,
+/// remove it from that list.
+/**
+ * @param[in] node The node to be opened.
+ */
 void Path::open_node(const Node& node)
 {
 	// Push the node into the open node list. Does not check open nodes, instead allowing
@@ -165,12 +206,21 @@ void Path::open_node(const Node& node)
 }
 
 
+/// Place this node in the closed nodes list.
+/**
+ * @param[in] node The node to be closed.
+ */
 void Path::close_node(const Node& node)
 {
     m_closed_nodes[node.tile_index] = node;
 }
 
 
+/// Update the Node's g and h values, as well as its previous node.
+/**
+ * @param[in] adjacent_node
+ * @return True if the new values are lower than the previous ones.
+ */
 bool Path::Node::update_costs(const Node& adjacent_node)
 {
     int32 new_g = adjacent_node.g + 1;
