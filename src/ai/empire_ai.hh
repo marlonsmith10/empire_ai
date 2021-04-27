@@ -2,7 +2,7 @@
 #define EMPIRE_AI_HH
 
 #include "stdafx.h"
-#include "../../ai_instance.hpp"
+#include "../../../ai_instance.hpp"
 
 #include "path.hh"
 #include "road_builder.hh"

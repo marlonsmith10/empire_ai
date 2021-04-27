@@ -4,7 +4,7 @@
  #ifndef SCRIPT_OBJECT_HPP
  #define SCRIPT_OBJECT_HPP
  
-+#include "../../ai/empire_ai/src/empire_ai.hh"
++#include "../../ai/empire_ai/src/ai/empire_ai.hh"
  #include "../../misc/countedptr.hpp"
  #include "../../road_type.h"
  #include "../../rail_type.h"
