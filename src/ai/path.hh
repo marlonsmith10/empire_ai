@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "command_func.h"
+#include "tile_type.h"
 #include <queue>
 #include <unordered_map>
 

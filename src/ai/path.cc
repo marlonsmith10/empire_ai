@@ -4,7 +4,6 @@
 #include "script_map.hpp"
 #include "script_road.hpp"
 #include "script_tile.hpp"
-#include "map_func.h"
 
 #include <algorithm>
 
