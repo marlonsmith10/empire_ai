@@ -1,0 +1,10 @@
+Empire AI Release Notes
+
+
+Version 0.01
+
+Initial release. Empire AI will pick two random towns, find the shortest land distance between them, and build a road.
+
+New features:
+
+- Road pathfinder
