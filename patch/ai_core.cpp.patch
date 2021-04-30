@@ -4,7 +4,7 @@
  
  #include "../safeguards.h"
  
-+#include "empire_ai/src/empire_ai.hh"
++#include "empire_ai/src/ai/empire_ai.hh"
 +
  /* static */ uint AI::frame_counter = 0;
  /* static */ AIScannerInfo *AI::scanner_info = nullptr;
