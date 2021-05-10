@@ -18,7 +18,7 @@
 using namespace EmpireAI;
 
 
-void PrintTownName(Town* town)
+void print_town_name(Town* town)
 {
 	if(town == nullptr)
 	{
@@ -62,8 +62,8 @@ void AI::game_loop()
 	        town2 = Town::GetRandom();
 	    }
 
-        PrintTownName(town1);
-        PrintTownName(town2);
+        print_town_name(town1);
+        print_town_name(town2);
 
 	    TileIndex town1_location = town1->xy;
 	    TileIndex town2_location = town2->xy;
