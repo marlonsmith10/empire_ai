@@ -274,60 +274,78 @@ void BuildStations::update(DecisionEngine* decision_engine)
 		std::cout << "\nIterate tile: " << TileX(*iterator) << "," << TileY(*iterator) << std::flush;
 
 		// Check adjacent tiles to see if one is available for a station and also provides passengers
-		for(uint8_t index = 0; index < 4; index++)
+		for(const TileIndex offset : offsets)
 		{
-			if(parse_adjacent_tile(*iterator, offsets[index]) == true)
+			if(parse_adjacent_tile(*iterator, offset) == true)
 			{
 				if(first_station_tile == 0)
 				{
 					first_station_tile = *iterator;
-					first_station_offset = offsets[index];
+					first_station_offset = offset;
 				}
 
 				last_station_tile = *iterator;
-				last_station_offset = offsets[index];
+				last_station_offset = offset;
 			}
 		}
 	}
 
 	// Build a station on the first available adjacent tile
-	try
-	{
-		ScriptRoad::BuildRoadStation(first_station_tile + first_station_offset, first_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
-	}
-	catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-	{
+    try
+    {
+        ScriptRoad::BuildRoadStation(first_station_tile + first_station_offset, first_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
 
-	}
+    }
 
-	// Build a station on the last available adjacent tile
-	try
-	{
-		ScriptRoad::BuildRoadStation(last_station_tile + last_station_offset, last_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
-	}
-	catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-	{
+    try
+    {
+        ScriptRoad::BuildRoad(first_station_tile + first_station_offset, first_station_tile);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
 
-	}
+    }
 
-	std::cout << "\nConstruction complete!" << std::flush;
+    // Build a station on the last available adjacent tile
+    try
+    {
+        ScriptRoad::BuildRoadStation(last_station_tile + last_station_offset, last_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
+
+    }
+
+    try
+    {
+        ScriptRoad::BuildRoad(last_station_tile + last_station_offset, last_station_tile);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
+
+    }
+
+    std::cout << "\nConstruction complete!" << std::flush;
     change_state(decision_engine, Init::instance());
 }
 
 
 bool BuildStations::parse_adjacent_tile(const TileIndex road_tile_index, const TileIndex offset_tile_index)
 {
+    TileIndex pre_road_tile_index = road_tile_index - offset_tile_index;
     TileIndex station_tile_index = road_tile_index + offset_tile_index;
-    TileIndex previous_tile_index = station_tile_index + offset_tile_index;
 
     std::cout << "\nCheck tile support station: " << TileX(station_tile_index) << "," << TileY(station_tile_index) << std::flush;
 
     std::cout << "\nCheck connect tiles: "
     		<< "\n" << TileX(station_tile_index) << "," << TileY(station_tile_index)
-			<< "\n" << TileX(previous_tile_index) << "," << TileY(previous_tile_index)
+			<< "\n" << TileX(pre_road_tile_index) << "," << TileY(pre_road_tile_index)
 			<< "\n" << TileX(road_tile_index) << "," << TileY(road_tile_index);
 
-	int32 can_connect = ScriptRoad::CanBuildConnectedRoadPartsHere(station_tile_index, previous_tile_index, road_tile_index);
+	int32 can_connect = ScriptRoad::CanBuildConnectedRoadPartsHere(road_tile_index, pre_road_tile_index, station_tile_index);
 
 	if(can_connect <= 0)
 	{
