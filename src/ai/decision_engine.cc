@@ -265,6 +265,8 @@ void BuildStations::update(DecisionEngine* decision_engine)
 
 	TileIndex first_station_tile = 0;
 	TileIndex first_station_offset = 0;
+	TileIndex road_depot_tile = 0;
+	TileIndex road_depot_offset = 0;
 	TileIndex last_station_tile = 0;
 	TileIndex last_station_offset = 0;
 
@@ -278,10 +280,20 @@ void BuildStations::update(DecisionEngine* decision_engine)
 		{
 			if(parse_adjacent_tile(*iterator, offset) == true)
 			{
+				// Build first station on the first available space
 				if(first_station_tile == 0)
 				{
 					first_station_tile = *iterator;
 					first_station_offset = offset;
+					continue;
+				}
+
+				// Build road depot on the next available space
+				if(road_depot_tile == 0)
+				{
+					road_depot_tile = *iterator;
+					road_depot_offset = offset;
+					continue;
 				}
 
 				last_station_tile = *iterator;
@@ -322,6 +334,25 @@ void BuildStations::update(DecisionEngine* decision_engine)
     try
     {
         ScriptRoad::BuildRoad(last_station_tile + last_station_offset, last_station_tile);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
+
+    }
+
+    // Build a road depot on any available tile
+    try
+    {
+        ScriptRoad::BuildRoadDepot(road_depot_tile + road_depot_offset, road_depot_tile);
+    }
+    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
+    {
+
+    }
+
+    try
+    {
+        ScriptRoad::BuildRoad(road_depot_tile + road_depot_offset, road_depot_tile);
     }
     catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
     {
