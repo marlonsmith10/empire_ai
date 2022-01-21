@@ -138,8 +138,6 @@ namespace EmpireAI
         TileIndex m_location_1;
         TileIndex m_location_2;
         Path* m_path;
-
-        bool parse_adjacent_tile(const TileIndex tile, const TileIndex offset_tile_index);
     };
 }
 

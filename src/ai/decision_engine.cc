@@ -8,10 +8,7 @@
 
 #include "stdafx.h"
 #include "town.h"
-
 #include "script_map.hpp"
-#include "script_road.hpp"
-
 
 using namespace EmpireAI;
 
@@ -182,6 +179,7 @@ BuildRoad* BuildRoad::m_instance = nullptr;
 BuildRoad::BuildRoad()
 {
     m_road_builder = nullptr;
+    m_path = nullptr;
 }
 
 
@@ -248,157 +246,64 @@ void BuildStations::set_path(Path* path)
 
 void BuildStations::update(DecisionEngine* decision_engine)
 {
-	std::cout << "\nLocation 1:" << TileX(m_location_1) << "," << TileY(m_location_1) << std::flush;
-	//look into ScriptTile::GetCargoProduction to see how it searches a radius of tiles, since we need to search a radius out from the town center or industry center to find
-	//suitable places to build a station
+    // Create an array of TileIndexes corresponding to N,S,E,W offsets
+    std::array<TileIndex, 4> offsets;
+    offsets[0] = ScriptMap::GetTileIndex(1, 0);
+    offsets[1] = ScriptMap::GetTileIndex(-1, 0);
+    offsets[2] = ScriptMap::GetTileIndex(0, 1);
+    offsets[3] = ScriptMap::GetTileIndex(0, -1);
 
+    TileIndex first_station_tile = 0;
+    TileIndex first_station_offset = 0;
+    TileIndex road_depot_tile = 0;
+    TileIndex road_depot_offset = 0;
+    TileIndex second_station_tile = 0;
+    TileIndex second_station_offset = 0;
 
-	/// \todo: Spiral outwards from town center and find the first available tile to build a station. Or better, do a tree search following roads away from the town
-	/// center to find the first available tile.
-
-	// Create an array of TileIndexes corresponding to N,S,E,W offsets
-	std::array<TileIndex, 4> offsets;
-	offsets[0] = ScriptMap::GetTileIndex(1, 0);
-	offsets[1] = ScriptMap::GetTileIndex(-1, 0);
-	offsets[2] = ScriptMap::GetTileIndex(0, 1);
-	offsets[3] = ScriptMap::GetTileIndex(0, -1);
-
-	TileIndex first_station_tile = 0;
-	TileIndex first_station_offset = 0;
-	TileIndex road_depot_tile = 0;
-	TileIndex road_depot_offset = 0;
-	TileIndex last_station_tile = 0;
-	TileIndex last_station_offset = 0;
-
-	// Follow the path between the two towns and first the first available tile for each side that can handle a station
-	for(Path::Iterator iterator = m_path->begin(); iterator != m_path->end(); iterator++)
-	{
-		std::cout << "\nIterate tile: " << TileX(*iterator) << "," << TileY(*iterator) << std::flush;
-
-		// Check adjacent tiles to see if one is available for a station and also provides passengers
-		for(const TileIndex offset : offsets)
-		{
-			if(parse_adjacent_tile(*iterator, offset) == true)
-			{
-				// Build first station on the first available space
-				if(first_station_tile == 0)
-				{
-					first_station_tile = *iterator;
-					first_station_offset = offset;
-					continue;
-				}
-
-				// Build road depot on the next available space
-				if(road_depot_tile == 0)
-				{
-					road_depot_tile = *iterator;
-					road_depot_offset = offset;
-					continue;
-				}
-
-				last_station_tile = *iterator;
-				last_station_offset = offset;
-			}
-		}
-	}
-
-	// Build a station on the first available adjacent tile
-    try
+    // Follow the path between the two towns and find available tiles for building stations and depot
+    for(Path::Iterator iterator = m_path->begin(); iterator != m_path->end(); iterator++)
     {
-        ScriptRoad::BuildRoadStation(first_station_tile + first_station_offset, first_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
+        // Check tiles adjacent to the road for ability to support stations and provide passengers
+        for(const TileIndex offset : offsets)
+        {
+            if(can_build_road_building(*iterator, offset))
+            {
+                // Build first station on the first available space
+                if(!first_station_tile && tile_provides_passengers(*iterator))
+                {
+                    first_station_tile = *iterator;
+                    first_station_offset = offset;
+                    continue;
+                }
 
+                // Build road depot on the next available space
+                if(!road_depot_tile)
+                {
+                    road_depot_tile = *iterator;
+                    road_depot_offset = offset;
+                    continue;
+                }
+
+                // Build second station on the last available space
+                if(tile_provides_passengers(*iterator))
+                {
+                    second_station_tile = *iterator;
+                    second_station_offset = offset;
+                }
+            }
+        }
     }
 
-    try
-    {
-        ScriptRoad::BuildRoad(first_station_tile + first_station_offset, first_station_tile);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
+    // Build first bus station
+    EmpireAI::build_bus_station(first_station_tile, first_station_offset);
 
-    }
+    // Build second bus station
+    EmpireAI::build_bus_station(second_station_tile, second_station_offset);
 
-    // Build a station on the last available adjacent tile
-    try
-    {
-        ScriptRoad::BuildRoadStation(last_station_tile + last_station_offset, last_station_tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
+    // Build road depot
+    EmpireAI::build_road_depot(road_depot_tile, road_depot_offset);
 
-    }
-
-    try
-    {
-        ScriptRoad::BuildRoad(last_station_tile + last_station_offset, last_station_tile);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
-
-    }
-
-    // Build a road depot on any available tile
-    try
-    {
-        ScriptRoad::BuildRoadDepot(road_depot_tile + road_depot_offset, road_depot_tile);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
-
-    }
-
-    try
-    {
-        ScriptRoad::BuildRoad(road_depot_tile + road_depot_offset, road_depot_tile);
-    }
-    catch (Script_Suspend &e)   /// \todo: Figure out what other exceptions to watch for
-    {
-
-    }
-
-    std::cout << "\nConstruction complete!" << std::flush;
     change_state(decision_engine, Init::instance());
-}
-
-
-bool BuildStations::parse_adjacent_tile(const TileIndex road_tile_index, const TileIndex offset_tile_index)
-{
-    TileIndex pre_road_tile_index = road_tile_index - offset_tile_index;
-    TileIndex station_tile_index = road_tile_index + offset_tile_index;
-
-    std::cout << "\nCheck tile support station: " << TileX(station_tile_index) << "," << TileY(station_tile_index) << std::flush;
-
-    std::cout << "\nCheck connect tiles: "
-    		<< "\n" << TileX(station_tile_index) << "," << TileY(station_tile_index)
-			<< "\n" << TileX(pre_road_tile_index) << "," << TileY(pre_road_tile_index)
-			<< "\n" << TileX(road_tile_index) << "," << TileY(road_tile_index);
-
-	int32 can_connect = ScriptRoad::CanBuildConnectedRoadPartsHere(road_tile_index, pre_road_tile_index, station_tile_index);
-
-	if(can_connect <= 0)
-	{
-		std::cout << "\nCan't connect" << std::flush;
-		return false;
-	}
-
-	if(!ScriptTile::IsBuildable(station_tile_index) || ScriptRoad::IsRoadTile(station_tile_index))
-	{
-		std::cout << "\nNot buildable" << std::flush;
-		return false;
-	}
-
-	if(ScriptTile::GetCargoProduction(station_tile_index, CT_PASSENGERS, 1, 1, 3) == 0)
-	{
-		std::cout << "\nNo passengers" << std::flush;
-		return false;
-	}
-
-	std::cout << "\nGood to build station!" << std::flush;
-
-	return true;
 }
 
 
