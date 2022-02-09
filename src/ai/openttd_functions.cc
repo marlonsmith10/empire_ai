@@ -10,6 +10,8 @@
 
 #include "script_station.hpp"
 #include "script_road.hpp"
+#include "script_testmode.hpp"
+#include "script_map.hpp"
 
 
 void EmpireAI::rename_company(std::string name)
@@ -39,14 +41,16 @@ void EmpireAI::print_town_name(Town* town)
 }
 
 
-bool EmpireAI::build_road(TileIndex tile, TileIndex direction_offset)
+bool EmpireAI::build_road(TileIndex start, TileIndex end)
 {
+    ScriptRoad::SetCurrentRoadType(ScriptRoad::ROADTYPE_ROAD);
+
     try
     {
-        if(!ScriptRoad::BuildRoad(tile + direction_offset, tile))
+        if(!ScriptRoad::BuildRoad(start, end))
         {
-        	return false;
-		}
+            return false;
+        }
     }
     catch (Script_Suspend &e)
     {
@@ -56,12 +60,12 @@ bool EmpireAI::build_road(TileIndex tile, TileIndex direction_offset)
 }
 
 
-bool EmpireAI::build_bus_station(TileIndex tile, TileIndex direction_offset)
+bool EmpireAI::build_bus_station(TileIndex tile, TileIndex front)
 {
 	// Build a station on the first available adjacent tile
     try
     {
-        if(!ScriptRoad::BuildRoadStation(tile + direction_offset, tile, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW))
+        if(!ScriptRoad::BuildRoadStation(tile, front, ScriptRoad::ROADVEHTYPE_BUS, ScriptStation::STATION_NEW))
         {
         	return false;
         }
@@ -70,31 +74,21 @@ bool EmpireAI::build_bus_station(TileIndex tile, TileIndex direction_offset)
     {
     }
 
-    if(!build_road(tile, direction_offset))
-    {
-    	return false;
-    }
-
     return true;
 }
 
 
-bool EmpireAI::build_road_depot(TileIndex tile, TileIndex direction_offset)
+bool EmpireAI::build_road_depot(TileIndex tile, TileIndex front)
 {
 	try
 	{
-		if(!ScriptRoad::BuildRoadDepot(tile + direction_offset, tile))
+		if(!ScriptRoad::BuildRoadDepot(tile, front))
 		{
 			return false;
 		}
 	}
 	catch (Script_Suspend &e)
 	{
-	}
-
-	if(!build_road(tile, direction_offset))
-	{
-		return false;
 	}
 
 	return true;
@@ -108,6 +102,13 @@ bool EmpireAI::can_build_road_building(TileIndex tile, TileIndex direction_offse
 }
 
 
+bool EmpireAI::can_build_road(TileIndex start, TileIndex end)
+{
+    ScriptTestMode test_mode;
+    return build_road(start, end);
+}
+
+
 bool EmpireAI::tile_provides_passengers(TileIndex tile)
 {
 	if(ScriptTile::GetCargoProduction(tile, CT_PASSENGERS, 1, 1, 3) == 0)
@@ -118,3 +119,8 @@ bool EmpireAI::tile_provides_passengers(TileIndex tile)
 	return true;
 }
 
+
+TileIndex EmpireAI::get_tile_index(uint32_t x, uint32_t y)
+{
+    return ScriptMap::GetTileIndex(x, y);
+}
