@@ -5,18 +5,16 @@
 
 namespace EmpireAI
 {
-
+    /**
+     * Class to build road stations and depots along a provided path.
+     */
     class RoadStationBuilder
     {
     public:
 
         RoadStationBuilder(Path& path);
 
-        // Iterates through a path and builds a bus station at the start and end
         bool build_bus_stations();
-
-        // Builds a road depot accessible to the provided path
-        bool build_road_depot();
 
     private:
 
