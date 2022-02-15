@@ -68,7 +68,7 @@ void Init::update(DecisionEngine* decision_engine)
     // Set company name
     rename_company("Empire Transport");
 
-    std::cout << "\nChoosing cargo" << std::flush;
+    std::cout << "\nChoosing cargo route" << std::flush;
 
     NewCargoRoute* new_cargo_route = static_cast<NewCargoRoute*>(NewCargoRoute::instance());
     change_state(decision_engine, new_cargo_route);
@@ -78,7 +78,6 @@ void Init::update(DecisionEngine* decision_engine)
 NewCargoRoute* NewCargoRoute::m_instance = nullptr;
 
 
-/// \todo: Use a template for all the instance functions?
 DecisionEngineState* NewCargoRoute::instance()
 {
     if(m_instance == nullptr)
@@ -223,7 +222,6 @@ void BuildRoad::update(DecisionEngine* decision_engine)
 BuildStations* BuildStations::m_instance = nullptr;
 
 
-/// \todo: Use a template for all the instance functions?
 DecisionEngineState* BuildStations::instance()
 {
     if(m_instance == nullptr)
