@@ -6,7 +6,7 @@
 namespace EmpireAI
 {
     /**
-     * Class to build road stations and depots along a provided path.
+     * Class that builds road stations and depots along a provided path.
      */
     class RoadStationBuilder
     {

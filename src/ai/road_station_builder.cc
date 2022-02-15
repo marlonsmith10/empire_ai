@@ -4,6 +4,10 @@
 using namespace EmpireAI;
 
 
+/// Construct a new road station builder.
+/**
+ * @param path Path object corresponding to an already built road route.
+ */
 RoadStationBuilder::RoadStationBuilder(Path& path)
 : m_path(path)
 {
