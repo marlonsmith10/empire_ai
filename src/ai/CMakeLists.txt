@@ -9,4 +9,6 @@ add_files(
     path.cc
     road_builder.hh
     road_builder.cc
+    road_station_builder.hh
+    road_station_builder.cc
 )

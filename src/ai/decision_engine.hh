@@ -54,7 +54,24 @@ namespace EmpireAI
 
     private:
 
-        static Init* _instance;
+        static Init* m_instance;
+    };
+
+
+    class NewCargoRoute : public DecisionEngineState
+    {
+    public:
+
+        static DecisionEngineState* instance();
+        void update(DecisionEngine* decision_engine);
+
+    protected:
+
+        NewCargoRoute(){}
+
+    private:
+
+        static NewCargoRoute* m_instance;
     };
 
 
@@ -73,7 +90,7 @@ namespace EmpireAI
 
     private:
 
-        static FindPath* _instance;
+        static FindPath* m_instance;
 
         Path* m_path;
     };
@@ -94,9 +111,33 @@ namespace EmpireAI
 
     private:
 
-        static BuildRoad* _instance;
+        static BuildRoad* m_instance;
 
         RoadBuilder* m_road_builder;
+        Path* m_path;
+    };
+
+
+    class BuildStations : public DecisionEngineState
+    {
+    public:
+
+        static DecisionEngineState* instance();
+        void update(DecisionEngine* decision_engine);
+
+        void set_locations(TileIndex location_1, TileIndex location_2);
+        void set_path(Path* path);
+
+    protected:
+
+        BuildStations(){}
+
+    private:
+
+        static BuildStations* m_instance;
+        TileIndex m_location_1;
+        TileIndex m_location_2;
+        Path* m_path;
     };
 }
 

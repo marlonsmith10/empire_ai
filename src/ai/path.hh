@@ -95,7 +95,6 @@ namespace EmpireAI
 
 	public:
 
-
 		/**
 		 * Once a path has been found, the iterator can be used to traverse the path.
 		 */
@@ -146,15 +145,15 @@ namespace EmpireAI
             TileIndex m_tile_index;
         };
 
-		Iterator begin()
+        Iterator begin()
         {
-			// Path is traversed in reverse order of discovery, thus begin returns the end tile
+            // Path is traversed in reverse order of discovery, so begin returns the end tile
             return Iterator(m_closed_nodes, m_end_tile_index);
         }
 
-		Iterator end()
+        Iterator end()
         {
-			// Path is traversed in reverse order of discovery, thus end returns one past the start tile
+            // Path is traversed in reverse order of discovery, so end returns one past the start tile
             return Iterator(m_closed_nodes, INVALID_TILE);
         }
 	};

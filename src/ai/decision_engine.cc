@@ -2,13 +2,14 @@
 
 #include "decision_engine.hh"
 #include "openttd_functions.hh"
+#include "road_station_builder.hh"
 
 #include <iostream>
 #include <vector>
 
 #include "stdafx.h"
 #include "town.h"
-
+#include "script_map.hpp"
 
 using namespace EmpireAI;
 
@@ -43,17 +44,17 @@ void DecisionEngineState::change_state(DecisionEngine* decision_engine, Decision
 }
 
 
-Init* Init::_instance = nullptr;
+Init* Init::m_instance = nullptr;
 
 
 DecisionEngineState* Init::instance()
 {
-    if(_instance == nullptr)
+    if(m_instance == nullptr)
     {
-        _instance = new Init();
+        m_instance = new Init();
     }
 
-    return _instance;
+    return m_instance;
 }
 
 
@@ -67,6 +68,30 @@ void Init::update(DecisionEngine* decision_engine)
     // Set company name
     rename_company("Empire Transport");
 
+    std::cout << "\nChoosing cargo" << std::flush;
+
+    NewCargoRoute* new_cargo_route = static_cast<NewCargoRoute*>(NewCargoRoute::instance());
+    change_state(decision_engine, new_cargo_route);
+}
+
+
+NewCargoRoute* NewCargoRoute::m_instance = nullptr;
+
+
+/// \todo: Use a template for all the instance functions?
+DecisionEngineState* NewCargoRoute::instance()
+{
+    if(m_instance == nullptr)
+    {
+        m_instance = new NewCargoRoute();
+    }
+
+    return m_instance;
+}
+
+
+void NewCargoRoute::update(DecisionEngine* decision_engine)
+{
     // Choose two random towns and create a new Path object between them
     Town* town1 = Town::GetRandom();
     Town* town2 = Town::GetRandom();
@@ -85,13 +110,17 @@ void Init::update(DecisionEngine* decision_engine)
 
     std::cout << "\nFinding path" << std::flush;
 
+    // Pass the source and destination into BuildStations, to be used once a path is found
+    BuildStations* build_stations = static_cast<BuildStations*>(BuildStations::instance());
+    build_stations->set_locations(town1_location, town2_location);
+
     FindPath* find_path = static_cast<FindPath*>(FindPath::instance());
     find_path->set_source_and_destination(town1_location, town2_location);
     change_state(decision_engine, find_path);
 }
 
 
-FindPath* FindPath::_instance = nullptr;
+FindPath* FindPath::m_instance = nullptr;
 
 
 FindPath::FindPath()
@@ -102,12 +131,12 @@ FindPath::FindPath()
 
 DecisionEngineState* FindPath::instance()
 {
-    if(_instance == nullptr)
+    if(m_instance == nullptr)
     {
-        _instance = new FindPath();
+        m_instance = new FindPath();
     }
 
-    return _instance;
+    return m_instance;
 }
 
 
@@ -141,23 +170,24 @@ void FindPath::update(DecisionEngine* decision_engine)
 }
 
 
-BuildRoad* BuildRoad::_instance = nullptr;
+BuildRoad* BuildRoad::m_instance = nullptr;
 
 
 BuildRoad::BuildRoad()
 {
     m_road_builder = nullptr;
+    m_path = nullptr;
 }
 
 
 DecisionEngineState* BuildRoad::instance()
 {
-    if(_instance == nullptr)
+    if(m_instance == nullptr)
     {
-        _instance = new BuildRoad();
+        m_instance = new BuildRoad();
     }
 
-    return _instance;
+    return m_instance;
 }
 
 
@@ -169,6 +199,7 @@ void BuildRoad::set_path(Path* path)
     }
 
     m_road_builder = new RoadBuilder(*path);
+    m_path = path;
 }
 
 
@@ -178,9 +209,49 @@ void BuildRoad::update(DecisionEngine* decision_engine)
     {
         if(m_road_builder->build_road_segment())
         {
-            std::cout << "\nConstruction complete!" << std::flush;
-            change_state(decision_engine, Init::instance());
+            std::cout << "\nRoad construction complete, building stations" << std::flush;
+
+            BuildStations* build_stations = static_cast<BuildStations*>(BuildStations::instance());
+            build_stations->set_path(m_path);
+            change_state(decision_engine, build_stations);
             break;
         }
     }
+}
+
+
+BuildStations* BuildStations::m_instance = nullptr;
+
+
+/// \todo: Use a template for all the instance functions?
+DecisionEngineState* BuildStations::instance()
+{
+    if(m_instance == nullptr)
+    {
+        m_instance = new BuildStations();
+    }
+
+    return m_instance;
+}
+
+
+void BuildStations::set_path(Path* path)
+{
+	m_path = path;
+}
+
+
+void BuildStations::update(DecisionEngine* decision_engine)
+{
+    RoadStationBuilder road_station_builder(*m_path);
+    road_station_builder.build_bus_stations();
+
+    change_state(decision_engine, Init::instance());
+}
+
+
+void BuildStations::set_locations(TileIndex location_1, TileIndex location_2)
+{
+	m_location_1 = location_1;
+	m_location_2 = location_2;
 }
