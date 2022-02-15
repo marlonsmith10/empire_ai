@@ -1,8 +1,14 @@
 add_files(
+    decision_engine.hh
+    decision_engine.cc
     empire_ai.hh
     empire_ai.cc
+    openttd_functions.hh
+    openttd_functions.cc
     path.hh
     path.cc
     road_builder.hh
     road_builder.cc
+    road_station_builder.hh
+    road_station_builder.cc
 )
