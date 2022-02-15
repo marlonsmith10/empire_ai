@@ -95,7 +95,6 @@ namespace EmpireAI
 
 	public:
 
-
 		/**
 		 * Once a path has been found, the iterator can be used to traverse the path.
 		 */
