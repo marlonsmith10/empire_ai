@@ -90,6 +90,8 @@ namespace EmpireAI
 
     private:
 
+        static const uint16_t SEARCH_NODES_PER_ITERATION = 100;
+
         static FindPath* m_instance;
 
         Path* m_path;

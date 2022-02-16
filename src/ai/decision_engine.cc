@@ -100,14 +100,13 @@ void NewCargoRoute::update(DecisionEngine* decision_engine)
     TileIndex town1_location = town1->xy;
     TileIndex town2_location = town2->xy;
 
-    std::cout << "\nFinding path" << std::flush;
-
     // Pass the source and destination into BuildStations, to be used once a path is found
     BuildStations* build_stations = static_cast<BuildStations*>(BuildStations::instance());
     build_stations->set_locations(town1_location, town2_location);
 
     FindPath* find_path = static_cast<FindPath*>(FindPath::instance());
     find_path->set_source_and_destination(town1_location, town2_location);
+    std::cout << "\nFinding path" << std::flush;
     change_state(decision_engine, find_path);
 }
 
@@ -145,13 +144,12 @@ void FindPath::set_source_and_destination(TileIndex source, TileIndex destinatio
 
 void FindPath::update(DecisionEngine* decision_engine)
 {
-    Path::Status find_status = m_path->find(100);
+    Path::Status find_status = m_path->find(SEARCH_NODES_PER_ITERATION);
     if(find_status == Path::FOUND)
     {
-        std::cout << "\nPath found, building road" << std::flush;
-
         BuildRoad* build_road = static_cast<BuildRoad*>(BuildRoad::instance());
         build_road->set_path(m_path);
+        std::cout << "\nPath found, building road" << std::flush;
         change_state(decision_engine, build_road);
     }
     if(find_status == Path::UNREACHABLE)
