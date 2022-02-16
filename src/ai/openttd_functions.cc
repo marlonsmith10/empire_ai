@@ -14,9 +14,9 @@
 #include "script_map.hpp"
 
 
-void EmpireAI::rename_company(std::string name)
+void EmpireAI::rename_company(const char* name)
 {
-    DoCommandPInternal(0, 0, 0, CMD_RENAME_COMPANY, nullptr, "Empire", false, false);
+    DoCommandPInternal(0, 0, 0, CMD_RENAME_COMPANY, nullptr, name, false, false);
 }
 
 

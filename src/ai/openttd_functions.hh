@@ -14,7 +14,7 @@
 
 namespace EmpireAI
 {
-    void rename_company(std::string name);
+    void rename_company(const char* name);
     void get_money(uint32_t amount);
     void print_town_name(Town* town);
 
