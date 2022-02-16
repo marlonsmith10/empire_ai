@@ -1,17 +1,16 @@
 /// \file
 
 #include "openttd_functions.hh"
-
-#include <iostream>
+#include "script_station.hpp"
+#include "script_road.hpp"
+#include "script_testmode.hpp"
+#include "script_map.hpp"
 
 #include "stdafx.h"
 #include "command_func.h"
 #include "townname_func.h"
 
-#include "script_station.hpp"
-#include "script_road.hpp"
-#include "script_testmode.hpp"
-#include "script_map.hpp"
+#include <iostream>
 
 
 void EmpireAI::rename_company(const char* name)

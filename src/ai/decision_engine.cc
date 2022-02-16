@@ -5,11 +5,7 @@
 #include "road_station_builder.hh"
 
 #include <iostream>
-#include <vector>
 
-#include "stdafx.h"
-#include "town.h"
-#include "script_map.hpp"
 
 using namespace EmpireAI;
 
@@ -60,8 +56,6 @@ DecisionEngineState* Init::instance()
 
 void Init::update(DecisionEngine* decision_engine)
 {
-    std::cout << "\nInit" << std::flush;
-
     // For testing, get some free money
     get_money(100000000);
 
@@ -69,7 +63,6 @@ void Init::update(DecisionEngine* decision_engine)
     rename_company("Empire Transport");
 
     std::cout << "\nChoosing cargo route" << std::flush;
-
     NewCargoRoute* new_cargo_route = static_cast<NewCargoRoute*>(NewCargoRoute::instance());
     change_state(decision_engine, new_cargo_route);
 }

@@ -6,10 +6,9 @@
 #ifndef OPENTTD_FUNCTIONS_HH
 #define OPENTTD_FUNCTIONS_HH
 
-#include <string>
-
 #include "stdafx.h"
 #include "town.h"
+#include <string>
 
 
 namespace EmpireAI
